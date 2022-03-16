@@ -1,8 +1,8 @@
 <?php
-$EM_CONF[$_EXTKEY] = array(
+$EM_CONF['solrgrouping'] = [
     'title' => 'Apache Solr for TYPO3 - Result Grouping',
     'description' => 'Solr Result Grouping allows grouping of documents sharing a common field. For each group the most relevant documents are returned.',
-    'version' => '1.3.0-dev',
+    'version' => '1.4.0-dev',
     'state' => 'stable',
     'category' => 'plugin',
     'author' => 'Ingo Renner',
@@ -13,18 +13,17 @@ $EM_CONF[$_EXTKEY] = array(
     'createDirs' => '',
     'modify_tables' => '',
     'clearCacheOnLoad' => 0,
-    'constraints' => array(
-        'depends' => array(
-            'solr' => '5.0.0-',
-            'typo3' => '7.6.0-8.0.99',
-        ),
-        'conflicts' => array(),
-        'suggests' => array(),
-    ),
-    'autoload' => array(
-        'psr-4' => array(
+    'constraints' => [
+        'depends' => [
+            'typo3' => '10.4.0-10.4.99',
+        ],
+        'conflicts' => [],
+        'suggests' => [],
+    ],
+    'autoload' => [
+        'psr-4' => [
             'ApacheSolrForTypo3\\Solrgrouping\\' => 'Classes/'
-        )
-    ),
+        ]
+    ],
     '_md5_values_when_last_written' => ''
-);
+];

@@ -1,3 +1,5 @@
+***Fork of apache-solr-for-typo3/solrgrouping for compat with TYPO3 10.4. Works for me, may work for you.***
+
 # Result Grouping
 
 EXT:solrgrouping is a TYPO3 extension that can be used as an addon for the extension "solr" providing Solr result grouping.

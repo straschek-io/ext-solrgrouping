@@ -38,14 +38,12 @@ use ApacheSolrForTypo3\Solr\Util;
  */
 class Grouping implements ResponseModifier, SearchAware
 {
-
     /**
      * Search instance that provided the response.
      *
      * @var Search
      */
     protected $search;
-
 
     /**
      * Sets the search instance that provided the response.
@@ -109,13 +107,15 @@ class Grouping implements ResponseModifier, SearchAware
      */
     protected function getFlattenedDocumentsList(\Apache_Solr_Response $response)
     {
-        $flatDocumentsList = array();
+        $flatDocumentsList = [];
 
         foreach ($response->grouped as $groupCollectionKey => $groupCollection) {
             $groupCollectionDocuments = $this->getGroupCollectionDocuments($groupCollectionKey, $groupCollection);
 
-            $groupCollectionDocuments = $this->addGroupConfigurationName($groupCollectionDocuments,
-                $groupCollectionKey);
+            $groupCollectionDocuments = $this->addGroupConfigurationName(
+                $groupCollectionDocuments,
+                $groupCollectionKey
+            );
 
             $flatDocumentsList = array_merge(
                 $flatDocumentsList,
@@ -142,7 +142,7 @@ class Grouping implements ResponseModifier, SearchAware
      */
     protected function getGroupCollectionDocuments($groupCollectionKey, $groupCollection)
     {
-        $groupCollectionDocuments = array();
+        $groupCollectionDocuments = [];
         $groupConfigurationName = $this->findGroupConfigurationNameByGroupCollectionKey($groupCollectionKey);
         $groupConfiguration = $this->getGroupConfigurationByName($groupConfigurationName);
 
@@ -187,7 +187,7 @@ class Grouping implements ResponseModifier, SearchAware
      */
     protected function getFieldGroupDocuments($group)
     {
-        $groupDocuments = array();
+        $groupDocuments = [];
 
         foreach ($group->doclist->docs as $rawDocument) {
             $document = $this->createApacheSolrDocument($rawDocument);
@@ -213,7 +213,7 @@ class Grouping implements ResponseModifier, SearchAware
      */
     protected function getQueryGroupDocuments($group)
     {
-        $groupDocuments = array();
+        $groupDocuments = [];
 
         foreach ($group->doclist->docs as $rawDocument) {
             $document = $this->createApacheSolrDocument($rawDocument);
@@ -269,34 +269,6 @@ class Grouping implements ResponseModifier, SearchAware
     }
 
     /**
-     * Creates an Apache_Solr_Document from a raw stdClass object as parsed by
-     * SolrPhpClient.
-     *
-     * For compatibility reasons taken from Apache_Solr_Response->_parseData()
-     *
-     * @param \stdClass $rawDocument The raw document as initially returned by SolrPhpClient
-     * @return \Apache_Solr_Document Apache Solr Document
-     */
-    private function createApacheSolrDocument(\stdClass $rawDocument)
-    {
-        $collapseSingleValueArrays = $this->search->getSolrConnection()->getCollapseSingleValueArrays();
-
-        $document = new \Apache_Solr_Document();
-        foreach ($rawDocument as $key => $value) {
-            // If a result is an array with only a single value
-            // then its nice to be able to access it
-            // as if it were always a single value
-            if ($collapseSingleValueArrays && is_array($value) && count($value) <= 1) {
-                $value = array_shift($value);
-            }
-
-            $document->$key = $value;
-        }
-
-        return $document;
-    }
-
-    /**
      * Adds the name of the group configuration to each Apache_Solr_Document
      * of a collection of document. If a configuration name cannot be found,
      * the name is not added to the documents.
@@ -335,14 +307,14 @@ class Grouping implements ResponseModifier, SearchAware
 
         foreach ($configuredGroups as $groupName => $groupConfiguration) {
             if (isset($groupConfiguration['field'])
-                && $groupConfiguration['field'] == $groupCollectionKey
+                && $groupConfiguration['field'] === $groupCollectionKey
             ) {
                 $groupConfigurationName = $groupName;
                 break;
             }
 
             if (isset($groupConfiguration['query'])
-                && $groupConfiguration['query'] == $groupCollectionKey
+                && $groupConfiguration['query'] === $groupCollectionKey
             ) {
                 $groupConfigurationName = $groupName;
                 break;
@@ -423,21 +395,46 @@ class Grouping implements ResponseModifier, SearchAware
         $groupEnd = count($documents) - 1;
 
         switch ($groupingType) {
-
             case 'fieldGroup':
                 $groupValue = $documents[0]->__solr_grouping_groupValue;
 
                 $documents[$groupStart]->__solr_grouping_groupStart = $groupValue . '_start';
                 $documents[$groupEnd]->__solr_grouping_groupEnd = $groupValue . '_end';
                 break;
-
             case 'queryGroup':
                 $documents[$groupStart]->__solr_grouping_groupStart = 'queryGroup_start';
                 $documents[$groupEnd]->__solr_grouping_groupEnd = 'queryGroup_end';
                 break;
-
         }
 
         return $documents;
+    }
+
+    /**
+     * Creates an Apache_Solr_Document from a raw stdClass object as parsed by
+     * SolrPhpClient.
+     *
+     * For compatibility reasons taken from Apache_Solr_Response->_parseData()
+     *
+     * @param \stdClass $rawDocument The raw document as initially returned by SolrPhpClient
+     * @return \Apache_Solr_Document Apache Solr Document
+     */
+    private function createApacheSolrDocument(\stdClass $rawDocument)
+    {
+        $collapseSingleValueArrays = $this->search->getSolrConnection()->getCollapseSingleValueArrays();
+
+        $document = new \Apache_Solr_Document();
+        foreach ($rawDocument as $key => $value) {
+            // If a result is an array with only a single value
+            // then its nice to be able to access it
+            // as if it were always a single value
+            if ($collapseSingleValueArrays && is_array($value) && count($value) <= 1) {
+                $value = array_shift($value);
+            }
+
+            $document->$key = $value;
+        }
+
+        return $document;
     }
 }

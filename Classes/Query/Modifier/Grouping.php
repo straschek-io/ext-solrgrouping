@@ -24,8 +24,13 @@ namespace ApacheSolrForTypo3\Solrgrouping\Query\Modifier;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
-use ApacheSolrForTypo3\Solr\Query;
+use ApacheSolrForTypo3\Solr\Domain\Search\Query\ParameterBuilder\Grouping as GroupingBuilder;
+use ApacheSolrForTypo3\Solr\Domain\Search\Query\Query;
+use ApacheSolrForTypo3\Solr\Domain\Search\Query\QueryBuilder;
+use ApacheSolrForTypo3\Solr\Domain\Search\SearchRequest;
+use ApacheSolrForTypo3\Solr\Domain\Search\SearchRequestAware;
 use ApacheSolrForTypo3\Solr\Query\Modifier\Modifier;
+use ApacheSolrForTypo3\Solr\Search;
 use ApacheSolrForTypo3\Solr\Util;
 
 /**
@@ -35,8 +40,17 @@ use ApacheSolrForTypo3\Solr\Util;
  * @package TYPO3
  * @subpackage solr
  */
-class Grouping implements Modifier
+class Grouping implements Modifier, SearchRequestAware
 {
+    /**
+     * @var Search
+     */
+    public $search;
+
+    /**
+     * @var SearchRequest
+     */
+    public $searchRequest;
 
     /**
      * Solr configuration
@@ -54,8 +68,7 @@ class Grouping implements Modifier
      */
     protected $groupingConfiguration;
 
-    protected $groupingParameters = array();
-
+    protected $groupingParameters = [];
 
     /**
      * Constructor
@@ -76,28 +89,19 @@ class Grouping implements Modifier
      */
     public function modifyQuery(Query $query)
     {
-        $query->setGrouping();
-
-        $query->setNumberOfResultsPerGroup($this->findHighestGroupResultsLimit());
-
-        if (!empty($this->groupingConfiguration['numberOfGroups'])) {
-            $query->setNumberOfGroups($this->groupingConfiguration['numberOfGroups']);
-        }
-
-        $configuredGroups = $this->groupingConfiguration['groups.'];
-        foreach ($configuredGroups as $groupName => $groupConfiguration) {
-            if (isset($groupConfiguration['field'])) {
-                $query->addGroupField($groupConfiguration['field']);
-            } elseif (isset($groupConfiguration['query'])) {
-                $query->addGroupQuery($groupConfiguration['query']);
-            }
-
-            if (isset($groupConfiguration['sortBy'])) {
-                $query->addGroupSorting($groupConfiguration['sortBy']);
-            }
-        }
-
+        $typoScriptConfiguration = $this->searchRequest->getContextTypoScriptConfiguration();
+        $grouping = GroupingBuilder::fromTypoScriptConfiguration($typoScriptConfiguration);
+        $queryBuilder = new QueryBuilder($typoScriptConfiguration);
+        $queryBuilder->startFrom($query)->useGrouping($grouping);
         return $query;
+    }
+    public function setSearch(Search $search)
+    {
+        $this->search = $search;
+    }
+    public function setSearchRequest(SearchRequest $searchRequest)
+    {
+        $this->searchRequest = $searchRequest;
     }
 
     /**

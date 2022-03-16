@@ -24,11 +24,12 @@ namespace ApacheSolrForTypo3\Solrgrouping\Search;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
-use ApacheSolrForTypo3\Solr\Plugin\CommandPostProcessor;
-use ApacheSolrForTypo3\Solr\Plugin\PluginAware;
-use ApacheSolrForTypo3\Solr\Query;
+//use ApacheSolrForTypo3\Solr\Query;
+use ApacheSolrForTypo3\Solr\Domain\Search\Query\Query;
+use ApacheSolrForTypo3\Solr\Domain\Search\ResultSet\Result\Parser\ResultParserRegistry;
 use ApacheSolrForTypo3\Solr\Search\AbstractComponent;
 use ApacheSolrForTypo3\Solr\Search\QueryAware;
+use ApacheSolrForTypo3\Solrgrouping\Search\ResultSet\Result\Parser\GroupedResultParser;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\Plugin\AbstractPlugin;
 
@@ -39,9 +40,8 @@ use TYPO3\CMS\Frontend\Plugin\AbstractPlugin;
  * @package TYPO3
  * @subpackage solr
  */
-class GroupingComponent extends AbstractComponent implements QueryAware, PluginAware, CommandPostProcessor
+class GroupingComponent extends AbstractComponent implements QueryAware
 {
-
     /**
      * Solr query
      *
@@ -56,13 +56,15 @@ class GroupingComponent extends AbstractComponent implements QueryAware, PluginA
      */
     protected $parentPlugin;
 
-
     /**
      * Initializes the search component.
      *
      */
     public function initializeSearchComponent()
     {
+        $solrResultParserRegistry = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(ResultParserRegistry::class);
+        $solrResultParserRegistry->registerParser(GroupedResultParser::class, 10);
+
         $groupingEnabled = true;
         $solrGetParameters = GeneralUtility::_GET('tx_solr');
 
@@ -80,7 +82,7 @@ class GroupingComponent extends AbstractComponent implements QueryAware, PluginA
             // turn off pagination and results per page switch as grouping
             // uses the start and rows parameters, too and thus pagination
             // not working as expected
-            $overwriteConfiguration = array();
+            $overwriteConfiguration = [];
             $overwriteConfiguration['search.']['results.']['pagebrowser.']['enabled'] = 0;
             $overwriteConfiguration['search.']['results.']['resultsPerPageSwitchOptions'] = '__UNSET';
 
@@ -99,7 +101,7 @@ class GroupingComponent extends AbstractComponent implements QueryAware, PluginA
      */
     public function postProcessCommandVariables($commandName, $commandVariables)
     {
-        if ($commandName == 'results') {
+        if ($commandName === 'results') {
             $groupingActive = 1;
 
             $solrGetParameters = GeneralUtility::_GET('tx_solr');

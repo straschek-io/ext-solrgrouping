@@ -13,7 +13,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class GroupedResultParser extends AbstractResultParser
 {
-    public function parse(SearchResultSet $resultSet, bool $useRawDocuments = true)
+    public function parse(SearchResultSet $resultSet, bool $useRawDocuments = true): SearchResultSet
     {
         /** @var SearchResultCollection $searchResults */
         $searchResults = GeneralUtility::makeInstance(SearchResultCollection::class);
@@ -72,10 +72,10 @@ class GroupedResultParser extends AbstractResultParser
         return $resultSet;
     }
 
-    public function canParse(SearchResultSet $resultSet)
+    public function canParse(SearchResultSet $resultSet): bool
     {
         $configuration = $resultSet->getUsedSearchRequest()->getContextTypoScriptConfiguration();
-        if ($configuration instanceof TypoScriptConfiguration && $configuration->getSearchGrouping()) {
+        if ($configuration instanceof TypoScriptConfiguration && $configuration->getIsSearchGroupingEnabled()) {
             return true;
         }
 

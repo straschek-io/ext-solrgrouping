@@ -87,7 +87,7 @@ class Grouping implements Modifier, SearchRequestAware
      * @param Query $query The query to modify
      * @return Query The modified query with grouping parameters
      */
-    public function modifyQuery(Query $query)
+    public function modifyQuery(Query $query): Query
     {
         $typoScriptConfiguration = $this->searchRequest->getContextTypoScriptConfiguration();
         $grouping = GroupingBuilder::fromTypoScriptConfiguration($typoScriptConfiguration);

@@ -21,9 +21,9 @@
 		"source": "https://github.com/TYPO3-Solr/ext-solrgrouping"
 	},
 	"require": {
-        "apache-solr-for-typo3/solr": "^11.1",
+        "apache-solr-for-typo3/solr": "^11.5.0-rc-2",
 		"php": ">=5.5.0",
-		"typo3/cms-core": ">=10.4"
+		"typo3/cms-core": ">=11.5"
 	},
 	"require-dev": {
 	},

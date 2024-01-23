@@ -47,7 +47,8 @@ class GroupedResultParser extends AbstractResultParser
                         $rawGroupItem->groupValue,
                         $rawGroupItem->doclist->numFound,
                         $rawGroupItem->doclist->start,
-                        $rawGroupItem->doclist->maxScore
+                        $rawGroupItem->doclist->maxScore,
+                        $resultSet->getUsedSearchRequest(),
                     );
 
                     $collectedMaximumScore = ($groupItem->getMaximumScore() > $collectedMaximumScore) ? $groupItem->getMaximumScore() : $collectedMaximumScore;
